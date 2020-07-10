@@ -3,13 +3,25 @@ module PutJSON where
 import Data.List (intercalate)
 import SimpleJSON
 
+data Doc = ToBeDefined
+         deriving (Show)
+
+string :: String -> Doc
+string str = undefined
+
+text :: String -> Doc
+text str = undefined
+
+double :: Double -> Doc
+double num = undefined
+
 -- Casamento de Padrões para os tipos em JSON
-renderJValue :: JValue -> String
-renderJValue (JString s)   = show s
-renderJValue (JNumber n)   = show n
-renderJValue (JBool True)  = "true"
-renderJValue (JBool False) = "false"
-renderJValue JNull         = "null"
+renderJValue :: JValue -> Doc
+renderJValue (JBool True)  = text "true"
+renderJValue (JBool False) = text "false"
+renderJValue JNull         = text "null"
+renderJValue (JNumber num) = double num
+renderJValue (JString str) = string str
 
 -- Casamento de Padrões para formatação
 renderJValue (JObject o) = "{" ++ pairs o ++ "}"
