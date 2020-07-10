@@ -1,4 +1,14 @@
-module SimpleJSON where
+module SimpleJSON
+    (
+      JValue(..) -- Exportação dos contrutores
+    , getString
+    , getInt
+    , getDouble
+    , getBool
+    , getObject
+    , getArray
+    , isNull
+    ) where
 
 data JValue = JString String
             | JNumber Double
@@ -8,7 +18,7 @@ data JValue = JString String
             | JArray [JValue]
               deriving (Eq, Ord, Show)
 
--- Rode o comando: 
+-- Rode o comando, para testar os construtores: 
 -- $ stack ghci
 
 getString :: JValue -> Maybe String
