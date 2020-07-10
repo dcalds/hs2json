@@ -10,6 +10,11 @@ renderJValue (JBool False) = text "false"
 renderJValue JNull         = text "null"
 renderJValue (JNumber num) = double num
 renderJValue (JString str) = string str
+renderJValue (JArray ary) = series '[' ']' renderJValue ary
+renderJValue (JObject obj) = series '{' '}' field obj
+    where field (name,val) = string name
+                          <> text ": "
+                          <> renderJValue val
 
 -- Envolve uma expressão de valor Doc com caractere de abertura e fechamento
 enclose :: Char -> Char -> Doc -> Doc
@@ -66,3 +71,11 @@ hexEscape :: Char -> Doc
 hexEscape c | d < 0x10000 = smallHex d
             | otherwise   = astral (d - 0x10000)
   where d = ord c
+
+fsep :: [Doc] -> Doc
+fsep xs = undefined
+
+punctuate :: Doc -> [Doc] -> [Doc]
+punctuate p []     = []
+punctuate p [d]    = [d]
+punctuate p (d:ds) = (d <> p) : punctuate p ds
