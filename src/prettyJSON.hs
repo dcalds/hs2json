@@ -6,15 +6,9 @@ module PrettyJSON
 import Numeric (showHex)
 import Data.Char (ord)
 import Data.Bits (shiftR, (.&.))
-
+import Prelude hiding ((<>))
 import SimpleJSON (JValue(..))
-import Prettify (Doc, (<>), char, double, fsep, hcat, punctuate, text,
-                 compact, pretty)
-
-import SimpleJSON
-
-data Doc = ToBeDefined
-         deriving (Show)
+import Prettify (Doc, (<>), char, double, fsep, hcat, punctuate, text, string, compact, pretty)
     
 -- Casamento de Padrões para os tipos em JSON
 renderJValue :: JValue -> Doc
@@ -33,25 +27,7 @@ renderJValue (JObject obj) = series '{' '}' field obj
 enclose :: Char -> Char -> Doc -> Doc
 enclose left right x = char left <> x <> char right
 
--- Função equivalente ao operador ++
-(<>) :: Doc -> Doc -> Doc
-a <> b = undefined
-
-hcat :: [Doc] -> Doc
-hcat xs = undefined
-
-char :: Char -> Doc
-char c = undefined
-
-string :: String -> Doc
-string = enclose '"' '"' . hcat . map oneChar
-
-text :: String -> Doc
-text str = undefined
-
-double :: Double -> Doc
-double num = undefined
-
+--
 oneChar :: Char -> Doc
 oneChar c = case lookup c simpleEscapes of
               Just r -> text r
@@ -59,36 +35,35 @@ oneChar c = case lookup c simpleEscapes of
                       | otherwise    -> char c
     where mustEscape c = c < ' ' || c == '\x7f' || c > '\xff'
 
+--
 simpleEscapes :: [(Char, String)]
 simpleEscapes = zipWith ch "\b\n\f\r\t\\\"/" "bnfrt\\\"/"
     where ch a b = (a, ['\\',b])
 
--- Expressão "point-free"
-pointyString :: String -> Doc
-pointyString s = enclose '"' '"' (hcat (map oneChar s))
-
-
+--
 smallHex :: Int -> Doc
 smallHex x  = text "\\u"
            <> text (replicate (4 - length h) '0')
            <> text h
     where h = showHex x ""
 
-
+--
 astral :: Int -> Doc
 astral n = smallHex (a + 0xd800) <> smallHex (b + 0xdc00)
     where a = (n `shiftR` 10) .&. 0x3ff
           b = n .&. 0x3ff
 
+--
 hexEscape :: Char -> Doc
 hexEscape c | d < 0x10000 = smallHex d
             | otherwise   = astral (d - 0x10000)
-  where d = ord c
+    where d = ord c
 
-fsep :: [Doc] -> Doc
-fsep xs = undefined
+-- Expressão "point-free"
+pointyString :: String -> Doc
+pointyString s = enclose '"' '"' (hcat (map oneChar s))
 
-punctuate :: Doc -> [Doc] -> [Doc]
-punctuate p []     = []
-punctuate p [d]    = [d]
-punctuate p (d:ds) = (d <> p) : punctuate p ds
+--
+series :: Char -> Char -> (a -> Doc) -> [a] -> Doc
+series open close item = enclose open close
+                       . fsep . punctuate (char ',') . map item
