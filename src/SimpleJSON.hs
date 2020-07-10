@@ -10,3 +10,7 @@ data JValue = JString String
 
 -- Rode o comando: 
 -- $ stack ghci
+
+getString :: JValue -> Maybe String
+getString (JString s) = Just s
+getString _           = Nothing
